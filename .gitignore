@@ -4,3 +4,6 @@
 #ignore tf state files
 *.tfstate
 *.tfstate.*
+
+#ignore tfvars variable file
+*.tfvars
