@@ -1,0 +1,6 @@
+#ignore tf folder
+.terraform/*
+
+#ignore tf state files
+*.tfstate
+*.tfstate.*
