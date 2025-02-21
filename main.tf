@@ -18,6 +18,10 @@ variable "env_prefix" {
 
 }
 
+variable "my_ip_cidr" {
+
+}
+
 resource "aws_vpc" "myapp-vpc" {
   cidr_block = var.vpc_cidr_block
 
@@ -54,4 +58,45 @@ resource "aws_route_table" "myapp-route-table" {
   tags = {
     Name = "${var.env_prefix}-route-table"
   }
+}
+
+resource "aws_route_table_association" "myapp-rta" {
+  subnet_id      = aws_subnet.myapp-subnet-1.id
+  route_table_id = aws_route_table.myapp-route-table.id
+}
+
+
+
+
+resource "aws_security_group" "myapp-sg" {
+  name        = "myapp-sg"
+  description = "Allow TLS inbound traffic and all outbound traffic"
+  vpc_id      = aws_vpc.myapp-vpc.id
+
+  tags = {
+    Name = "${var.env_prefix}-sg"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "myapp-ssh-access" {
+  security_group_id = aws_security_group.myapp-sg.id
+  cidr_ipv4         = var.my_ip_cidr # Your IP for SSH access
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+
+resource "aws_vpc_security_group_ingress_rule" "myapp-port8080-access" {
+  security_group_id = aws_security_group.myapp-sg.id
+  cidr_ipv4         = "0.0.0.0/0" # Allow HTTP from anywhere
+  from_port         = 8080
+  ip_protocol       = "tcp"
+  to_port           = 8080
+}
+
+resource "aws_vpc_security_group_egress_rule" "myapp-allow-all-outbound" {
+  security_group_id = aws_security_group.myapp-sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
 }
