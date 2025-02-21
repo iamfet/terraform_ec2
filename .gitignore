@@ -5,5 +5,5 @@
 *.tfstate
 *.tfstate.*
 
-#ignore tfvars variable file
+#ignore tfvars variable file as it contains sensitive info
 *.tfvars
