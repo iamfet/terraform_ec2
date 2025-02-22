@@ -2,33 +2,24 @@ provider "aws" {
   region = "us-east-1"
 }
 
-variable "vpc_cidr_block" {
+variable "vpc_cidr_block" {}
 
-}
+variable "subnet_cidr_block" {}
 
-variable "subnet_cidr_block" {
+variable "avail_zone" {}
 
-}
+variable "env_prefix" {}
 
-variable "avail_zone" {
+variable "my_ip_cidr" {}
 
-}
+variable "key_name" {}
 
-variable "env_prefix" {
+variable "public_key_location" {}
 
-}
 
-variable "my_ip_cidr" {
-
-}
-
-variable "key_name" {
-
-}
 
 resource "aws_vpc" "myapp-vpc" {
   cidr_block = var.vpc_cidr_block
-
   tags = {
     Name = "${var.env_prefix}-vpc"
   }
@@ -68,9 +59,6 @@ resource "aws_route_table_association" "myapp-rta" {
   subnet_id      = aws_subnet.myapp-subnet-1.id
   route_table_id = aws_route_table.myapp-route-table.id
 }
-
-
-
 
 resource "aws_security_group" "myapp-sg" {
   name        = "myapp-sg"
@@ -121,8 +109,22 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-output "name" {
+output "ec2_instance_id" {
   value = data.aws_ami.ubuntu.id
+}
+
+output "ec2_public_ip" {
+  value = aws_instance.myapp-server.public_ip
+}
+
+# Create an EC2 Key Pair using the public key from your local machine
+resource "aws_key_pair" "ssh-key" {
+  key_name   = "myapp-keypair"
+  public_key = file(var.public_key_location)
+
+  tags = {
+    Name = "${var.env_prefix}-myapp-ssh-keypair"
+  }
 }
 
 resource "aws_instance" "myapp-server" {
@@ -134,7 +136,7 @@ resource "aws_instance" "myapp-server" {
 
   associate_public_ip_address = true
 
-  key_name = var.key_name
+  key_name = aws_key_pair.ssh-key.id
 
   tags = {
     Name = "${var.env_prefix}-myapp-server"
