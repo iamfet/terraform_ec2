@@ -133,11 +133,11 @@ resource "aws_instance" "myapp-server" {
   subnet_id         = aws_subnet.myapp-subnet-1.id
   security_groups   = [aws_security_group.myapp-sg.id]
   availability_zone = var.avail_zone
-
   associate_public_ip_address = true
-
   key_name = aws_key_pair.ssh-key.id
-
+  
+  user_data = file("entry-script.sh")
+  user_data_replace_on_change = true
   tags = {
     Name = "${var.env_prefix}-myapp-server"
   }
