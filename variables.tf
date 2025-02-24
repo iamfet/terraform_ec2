@@ -12,3 +12,7 @@ variable "my_ip_cidr" {}
 variable "key_name" {}
 
 variable "public_key_location" {}
+
+variable "image_name" {}
+
+variable "instance_type" {}
